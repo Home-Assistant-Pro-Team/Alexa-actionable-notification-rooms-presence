@@ -1,0 +1,81 @@
+blueprint:
+  name: Alexa actionable notification rooms presence.
+  domain: automation
+  author: Marco Picardo
+  homeassistant:
+    min_version: 2023.10.3
+  description: "`- Version: 1.0 -`\n\n
+    This project uses the excellent work of [Keaton Taylor](https://github.com/keatontaylor/alexa-actions) and is designed to simplify presence monitoring in rooms(area) with the help of Alexa.\n\n\
+    The process is simple: just select one or more motion sensors and configure the time within which the sensor switches from the 'on' state to the 'off' state.\n\n
+    A unique aspect of this design is its ability to **manage automation automatically in different rooms**.
+    If at least one light or media_player device is on in a room where a motion sensor is triggered, the Alexa device in that room will take action.
+    Alexa will ask you if anyone is still in the room, and if no answer is received, it will automatically turn off the lights and media_players.\n\n
+    In addition, the project provides an optional [bedpresence](https://github.com/Home-Assistant-Pro-Team/Bed-Presence/tree/main) status monitoring function. If you have the entity starting with binary_sensor.bedpresence_, you can integrate it into the project to monitor presence in beds. However, it is important to note that the project will still work effectively without this functionality.\n\n
+    This design is highly flexible and can autonomously detect which room to run automation in based on the activation of motion sensors.\n\n
+    ### To ensure proper operation of the project, it is essential to assign devices to the appropriate areas, and the system will operate completely autonomously."
+  input:
+    motion_sensors:
+      name: Motion sensors
+      description: "Selezionare i sensori di movimento da utiluizzare. "
+      selector:
+        entity:
+          multiple: true
+          domain: binary_sensor
+          device_class: motion
+    delay_motion_sensors:
+      default: 10
+      name: Delay motion sensors
+      description: "Minuti di attesa dallo stato off"
+      selector:
+        number:
+          min: 0
+          max: 60
+          unit_of_measurement: min
+          mode: slider
+          step: 1
+    text_notify: 
+      name: Text notify
+      default: Ti trovi ancora in 
+      description: "Inserire il testo della domanda senza il nome della stanza"
+mode: parallel
+variables:
+  text_notify: !input text_notify
+  areas: "{{ area_name(trigger.entity_id) }}"
+  lights: "{{ states.light | selectattr('state', 'eq', 'on') | map(attribute='entity_id') | select('in', area_entities(areas)) | list }}"
+  media_players: "{{ states.media_player | rejectattr('state', 'in', ['off', 'unknown', 'unavailable', 'standby']) | map(attribute='entity_id') | select('in', area_entities(areas)) | list }}"
+  bed_presences: "{{ states.binary_sensor | selectattr('entity_id', 'search', '.bedprecence_') | selectattr('state', 'eq', 'on')| map(attribute='entity_id') | select('in', area_entities(areas))| list }}"
+trigger:
+  - platform: state
+    entity_id: !input motion_sensors
+    from: "on"
+    to: "off"
+    for:
+      minutes: !input delay_motion_sensors
+condition:
+  - "{{ bed_presences | count == 0 }}"
+  - or:
+      - "{{ lights | count > 0 }}"
+      - "{{ media_players | count > 0 }}"
+action:
+  - service: script.activate_alexa_actionable_notification
+    data:
+      text: "{{text_notify + (' ') + areas}}?"
+      event_id: room_presence
+      alexa_device: "{{ states.media_player | map(attribute='entity_id') | select('in', area_entities(areas)) |select('in', integration_entities('alexa_media')) | list | first }}"
+  - wait_for_trigger:
+      - platform: event
+        event_type: alexa_actionable_notification
+        event_data:
+          event_id: room_presence
+  - condition: template
+    value_template: "{{ 'ResponseNone' == wait.trigger.event.data.event_response and is_state(trigger.entity_id, 'off') }}"
+  - if: "{{ lights | count > 0 }}"
+    then:
+      - service: light.turn_off
+        target:
+          entity_id: "{{ lights }}"
+  - if: "{{ media_players | count > 0 }}"
+    then:
+      - service: media_player.turn_off
+        target:
+          entity_id: "{{ media_players }}"
