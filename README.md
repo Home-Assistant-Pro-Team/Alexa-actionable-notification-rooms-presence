@@ -13,3 +13,12 @@ Inoltre, il progetto offre una funzione facoltativa di controllo dello stato di 
 Questo progetto è altamente flessibile e in grado di rilevare autonomamente in quale stanza eseguire l'automazione in base all'attivazione dei sensori di movimento.
 
 ### Per garantire il corretto funzionamento del progetto, è essenziale assegnare i dispositivi alle aree appropriate, e il sistema opererà in modo completamente autonomo.
+
+## Puoi accedere al progetto dal [link](https://community.home-assistant.io/t/alexa-actionable-notification-rooms-presence/628659)
+
+#### **Supportaci**
+Se hai apprezzato questo progetto, ci piacerebbe avere il tuo supporto. Anche un semplice caffè può fare la differenza. 
+I fondi raccolti saranno utilizzati per acquistare nuovo materiale e realizzare nuovi progetti. Puoi contribuire cliccando sul pulsante qui sotto. 
+Grazie di cuore per il tuo sostegno!
+
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/M4M1MI00I)
