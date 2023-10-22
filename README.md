@@ -4,6 +4,9 @@ Questo progetto utilizza l'ottimo lavoro di [Keaton Taylor](https://github.com/k
 
 Il processo è semplice: basta selezionare uno o più sensori di movimento e configurare il tempo entro il quale il sensore passa dallo stato 'on' allo stato 'off'.
 
+![image](https://github.com/Home-Assistant-Pro-Team/Alexa-actionable-notification-rooms-presence/assets/62516592/bde76fae-b29c-4da2-9d16-8c5f348d9b66)
+
+
 Un aspetto unico di questo progetto è la sua capacità di **gestire automaticamente l'automazione in diverse stanze**.
 Se in una stanza dove è scattato un sensore di movimento è accesa almeno una luce o un dispositivo media_player, il dispositivo Alexa presente in quella stanza entrerà in azione.
 Alexa ti chiederà se c'è ancora qualcuno nella stanza, e se non riceve risposta, provvederà automaticamente a spegnere le luci e i media_player.
